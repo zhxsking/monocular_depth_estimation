@@ -1,0 +1,23 @@
+--mode train
+--dataset irs
+--data_path E:\\data\\home\\yangxiaoli\\stereo_data\\IRSDataset_lmdb/
+--filelist_txt ./filelist-lmdb-subset-irs-train
+--msg test-IRS
+--batchsize 2
+--num_epochs 20
+--lr 1e-3
+--lr_end 1e-4
+--lr_policy plateau
+--weight_decay 0
+--num_threads 0
+
+--sparse_ratio 0.01
+--crop_w 480
+--crop_h 256
+--max_depth 50
+--gpu 0
+
+--log_freq 10
+--val_freq 3000
+--log_dir ./checkpoint-fusion-irs/
+--filelist_txt_val ./filelist-lmdb-subset-irs-val

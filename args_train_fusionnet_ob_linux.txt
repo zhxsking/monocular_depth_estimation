@@ -1,0 +1,26 @@
+--mode train
+--dataset ob
+--data_path /opt/data/ob_dataset/sync/baseline_large
+--filelist_txt ./filelist-ob-dataset-train
+--msg test-something
+--batchsize 4
+--num_epochs 20
+--lr 1e-3
+--lr_end 1e-4
+--lr_policy plateau
+--weight_decay 0
+--num_threads 4
+
+--sparse_ratio 0.01
+--resize_w 640
+--resize_h 360
+--crop_w 512
+--crop_h 352
+--degree 2.5
+--max_depth 100
+--gpu 0
+
+--log_freq 100
+--val_freq 500
+--log_dir ./checkpoint-fusion-ob/
+--filelist_txt_val ./filelist-ob-dataset-val

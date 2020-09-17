@@ -1,0 +1,23 @@
+--mode train
+--dataset nyu
+--data_path /opt/data/nyu_depth_v2
+--filelist_txt ./filelist-nyu-dataset-train
+--msg test-something
+--batchsize 8
+--num_epochs 20
+--lr 1e-3
+--lr_end 1e-4
+--lr_policy plateau
+--weight_decay 0
+--num_threads 4
+
+--sparse_ratio 0.01
+--crop_w 512
+--crop_h 384
+--max_depth 10
+--gpu 0
+
+--log_freq 100
+--val_freq 500
+--log_dir ./checkpoint-fusion-nyu/
+--filelist_txt_val ./filelist-nyu-dataset-test

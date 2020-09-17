@@ -1,0 +1,9 @@
+--mode test
+--dataset ob
+--data_path D:\\code\\python\\monocular_depth_estimation\\test_pics
+--filelist_txt_test ./filelist-bts-test
+--checkpoint_path ./checkpoint-bts-ob\\models\\model-23250-best-silog-18.78964
+--num_threads 2
+--max_depth 100
+--gpu 0
+--save_dir ./results/

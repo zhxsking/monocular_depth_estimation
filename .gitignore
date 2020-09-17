@@ -1,0 +1,6 @@
+*.pyc
+checkpoint*
+__pycache__/
+.idea/
+result*
+test_pics/

@@ -1,0 +1,10 @@
+--mode val
+--dataset kitti
+--data_path D:\\pic\\KITTI\\sync
+--filelist_txt_test ./filelist-kitti-dataset-test
+--checkpoint_path ./checkpoint\\model-13500-best-rmse-1.20500
+--num_threads 4
+--max_depth 85
+--sparse_ratio 0.01
+--gpu 0
+--save_dir ./results/

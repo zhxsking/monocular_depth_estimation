@@ -1,0 +1,25 @@
+--mode train
+--encoder densenet121_bts
+--dataset ob
+--data_path /opt/data/ob_dataset/sync/baseline_large
+--filelist_txt ./filelist-ob-dataset-train
+--msg test-something
+--batchsize 4
+--num_epochs 50
+--lr 1.414e-4
+--lr_end 1e-5
+--weight_decay 1e-4
+--num_threads 1
+
+--resize_w 640
+--resize_h 360
+--crop_w 640
+--crop_h 352
+--max_depth 300
+--log_dir ./checkpoint-bts-ob/
+--gpu 0
+
+
+--log_freq 100
+--val_freq 500
+--filelist_txt_val ./filelist-ob-dataset-val

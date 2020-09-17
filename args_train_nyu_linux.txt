@@ -1,0 +1,24 @@
+--mode train
+--encoder densenet121_bts
+--dataset nyu
+--data_path /opt/data/nyu_depth_v2
+--filelist_txt ./filelist-nyu-bts-train
+--msg test-something
+--batchsize 4
+--num_epochs 50
+--lr 1.414e-4
+--lr_end 1e-5
+--weight_decay 1e-2
+--num_threads 2
+
+--crop_w 544
+--crop_h 416
+--degree 2.5
+--max_depth 10
+--log_dir ./checkpoint-bts-nyu/
+--gpu 0
+
+--log_freq 100
+--val_freq 500
+--do_eigen_crop
+--filelist_txt_val ./filelist-nyu-bts-val

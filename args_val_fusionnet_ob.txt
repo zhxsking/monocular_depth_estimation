@@ -1,0 +1,10 @@
+--mode val
+--dataset ob
+--data_path C:\\pic\\ob_dataset\\sync\\baseline_large
+--filelist_txt_test ./filelist-ob-dataset-val
+--checkpoint_path ./checkpoint\\model-126000-best-mae-0.28507
+--num_threads 2
+--max_depth 100
+--sparse_ratio 0.01
+--gpu 0
+--save_dir ./results/
