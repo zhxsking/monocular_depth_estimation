@@ -52,14 +52,14 @@ def evalNet_lidar(model, dataloader_val, device, mea_nums):
             lidar_in = lidar_in.to(device, non_blocking=True)
             depth_gt = depth_gt.to(device, non_blocking=True)
 
-            input = torch.cat((lidar_in, img), 1)
-            output = model(input)
-            depth_est, _, _, _ = output[0], output[1], output[2], output[3]
-            depth_est = torch.clamp(depth_est, 0, args.max_depth)
-
-            # output = model([img, lidar_in])
-            # depth_est, _, _, _, _ = output[0], output[1], output[2], output[3], output[4]
+            # input = torch.cat((lidar_in, img), 1)
+            # output = model(input)
+            # depth_est, _, _, _ = output[0], output[1], output[2], output[3]
             # depth_est = torch.clamp(depth_est, 0, args.max_depth)
+
+            output = model([img, lidar_in])
+            depth_est, _, _, _, _ = output[0], output[1], output[2], output[3], output[4]
+            depth_est = torch.clamp(depth_est, 0, args.max_depth)
 
             valid_mask = get_valid_mask(depth_gt, args)
             metrics_tmp, min_is_best_mask, metrics_names = compute_errors_3(depth_gt, depth_est, valid_mask)
@@ -153,21 +153,22 @@ if __name__ == '__main__':
     #                               lr=args.lr, eps=1e-6)
     # mea_nums = 9
 
-    model = uncertainty_net(in_channels=4).to(device)
-    define_init_weights(model, args.weight_init)
-    optimizer = define_optim(args.optimizer, model.parameters(), args.lr, args.weight_decay)
-    criterion_local = MSE_loss()
-    criterion_lidar = MSE_loss()
-    criterion_rgb = MSE_loss()
-    criterion_guide = MSE_loss()
-    mea_nums = 3
-
-    # model = BtsModel_v1(args.max_depth).to(device)
-    # optimizer = torch.optim.AdamW([{'params': model.encoder.parameters(), 'weight_decay': args.weight_decay},
-    #                                {'params': model.decoder.parameters(), 'weight_decay': 0}],
-    #                               lr=args.lr, eps=1e-6)
-    # loss_func = MSE_loss()
+    # model = uncertainty_net(in_channels=4).to(device)
+    # define_init_weights(model, args.weight_init)
+    # optimizer = define_optim(args.optimizer, model.parameters(), args.lr, args.weight_decay)
+    # criterion_local = MSE_loss()
+    # criterion_lidar = MSE_loss()
+    # criterion_rgb = MSE_loss()
+    # criterion_guide = MSE_loss()
     # mea_nums = 3
+
+    model = BtsModel_v1(args.max_depth).to(device)
+    optimizer = torch.optim.AdamW([{'params': model.encoder.parameters(), 'weight_decay': args.weight_decay},
+                                   {'params': model.decoder.parameters(), 'weight_decay': 0}],
+                                  lr=args.lr, eps=1e-6)
+    # loss_func = MSE_loss()
+    loss_func = silog_loss(variance_focus=args.variance_focus).to(device)
+    mea_nums = 3
 
     # 初始化
     os.makedirs(os.path.join(args.log_dir, 'models'), exist_ok=True)
@@ -240,20 +241,22 @@ if __name__ == '__main__':
             #     current_lr = (args.lr - args.lr_end) * (1 - global_step / steps_total) ** 0.9 + args.lr_end
             #     param_group['lr'] = current_lr
 
-            input = torch.cat((lidar_in, img), 1).to(device, non_blocking=True)
-            output = model(input)
-            depth_est, lidar_out, precise, guide = output[0], output[1], output[2], output[3]
-            depth_est = torch.clamp(depth_est, 0, args.max_depth)
-            loss = criterion_local(depth_est, depth_gt)
-            loss_lidar = criterion_lidar(lidar_out, depth_gt)
-            loss_rgb = criterion_rgb(precise, depth_gt)
-            loss_guide = criterion_guide(guide, depth_gt)
-            loss = 1 * loss + 0.1 * loss_lidar + 0.1 * loss_rgb + 0.1 * loss_guide
-
-            # output = model([img, lidar_in])
-            # depth_est, lpg8x8, lpg4x4, lpg2x2, reduc1x1 = output[0], output[1], output[2], output[3], output[4]
+            # input = torch.cat((lidar_in, img), 1).to(device, non_blocking=True)
+            # output = model(input)
+            # depth_est, lidar_out, precise, guide = output[0], output[1], output[2], output[3]
             # depth_est = torch.clamp(depth_est, 0, args.max_depth)
+            # loss = criterion_local(depth_est, depth_gt)
+            # loss_lidar = criterion_lidar(lidar_out, depth_gt)
+            # loss_rgb = criterion_rgb(precise, depth_gt)
+            # loss_guide = criterion_guide(guide, depth_gt)
+            # loss = 1 * loss + 0.1 * loss_lidar + 0.1 * loss_rgb + 0.1 * loss_guide
+
+            output = model([img, lidar_in])
+            depth_est, lpg8x8, lpg4x4, lpg2x2, reduc1x1 = output[0], output[1], output[2], output[3], output[4]
+            depth_est = torch.clamp(depth_est, 0, args.max_depth)
             # loss = loss_func(depth_est, depth_gt)
+            mask = depth_gt > 0
+            loss = loss_func(depth_est, depth_gt, mask.to(torch.bool))
 
             optimizer.zero_grad()
             loss.backward()

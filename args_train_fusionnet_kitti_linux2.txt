@@ -1,0 +1,22 @@
+--mode train
+--dataset kitti
+--data_path /home/ubuntu/data/kitti_sync/sync/
+--filelist_txt ./filelist-kitti-dataset-train
+--msg test-something
+--batchsize 16
+--num_epochs 20
+--lr 1e-3
+--lr_end 1e-4
+--lr_policy plateau
+--weight_decay 0
+--num_threads 4
+
+--crop_w 512
+--crop_h 256
+--max_depth 85
+--gpu 6
+
+--log_freq 100
+--val_freq 500
+--log_dir ./checkpoint-fusion-kitti-base-bs16/
+--filelist_txt_val ./filelist-kitti-dataset-test
