@@ -145,22 +145,22 @@ if __name__ == '__main__':
     torch.cuda.empty_cache()
     torch.backends.cudnn.benchmark = True
 
-    model = BtsModel(args.max_depth, args.encoder).to(device)
-    set_misc(model)
-    loss_func = silog_loss(variance_focus=args.variance_focus).to(device)
-    optimizer = torch.optim.AdamW([{'params': model.encoder.parameters(), 'weight_decay': args.weight_decay},
-                                   {'params': model.decoder.parameters(), 'weight_decay': 0}],
-                                  lr=args.lr, eps=1e-6)
-    mea_nums = 9
+    # model = BtsModel(args.max_depth, args.encoder).to(device)
+    # set_misc(model)
+    # loss_func = silog_loss(variance_focus=args.variance_focus).to(device)
+    # optimizer = torch.optim.AdamW([{'params': model.encoder.parameters(), 'weight_decay': args.weight_decay},
+    #                                {'params': model.decoder.parameters(), 'weight_decay': 0}],
+    #                               lr=args.lr, eps=1e-6)
+    # mea_nums = 9
 
-    # model = uncertainty_net(in_channels=4).to(device)
-    # define_init_weights(model, args.weight_init)
-    # optimizer = define_optim(args.optimizer, model.parameters(), args.lr, args.weight_decay)
-    # criterion_local = MSE_loss()
-    # criterion_lidar = MSE_loss()
-    # criterion_rgb = MSE_loss()
-    # criterion_guide = MSE_loss()
-    # mea_nums = 3
+    model = uncertainty_net(in_channels=4).to(device)
+    define_init_weights(model, args.weight_init)
+    optimizer = define_optim(args.optimizer, model.parameters(), args.lr, args.weight_decay)
+    criterion_local = MSE_loss()
+    criterion_lidar = MSE_loss()
+    criterion_rgb = MSE_loss()
+    criterion_guide = MSE_loss()
+    mea_nums = 3
 
     # model = BtsModel_v1(args.max_depth).to(device)
     # optimizer = torch.optim.AdamW([{'params': model.encoder.parameters(), 'weight_decay': args.weight_decay},
@@ -231,24 +231,24 @@ if __name__ == '__main__':
             depth_gt = depth_gt.to(device, non_blocking=True)
             # show(img), show(lidar_in), show(depth_gt), show(depth_est)
 
-            output = model(img)
-            depth_est, lpg8x8, lpg4x4, lpg2x2, reduc1x1 = output[0], output[1], output[2], output[3], output[4]
-            depth_est = torch.clamp(depth_est, 0, args.max_depth)
-            mask = depth_gt > 0
-            loss = loss_func(depth_est, depth_gt, mask.to(torch.bool))
-            for param_group in optimizer.param_groups:
-                current_lr = (args.lr - args.lr_end) * (1 - global_step / steps_total) ** 0.9 + args.lr_end
-                param_group['lr'] = current_lr
-
-            # input = torch.cat((lidar_in, img), 1).to(device, non_blocking=True)
-            # output = model(input)
-            # depth_est, lidar_out, precise, guide = output[0], output[1], output[2], output[3]
+            # output = model(img)
+            # depth_est, lpg8x8, lpg4x4, lpg2x2, reduc1x1 = output[0], output[1], output[2], output[3], output[4]
             # depth_est = torch.clamp(depth_est, 0, args.max_depth)
-            # loss = criterion_local(depth_est, depth_gt)
-            # loss_lidar = criterion_lidar(lidar_out, depth_gt)
-            # loss_rgb = criterion_rgb(precise, depth_gt)
-            # loss_guide = criterion_guide(guide, depth_gt)
-            # loss = 1 * loss + 0.1 * loss_lidar + 0.1 * loss_rgb + 0.1 * loss_guide
+            # mask = depth_gt > 0
+            # loss = loss_func(depth_est, depth_gt, mask.to(torch.bool))
+            # for param_group in optimizer.param_groups:
+            #     current_lr = (args.lr - args.lr_end) * (1 - global_step / steps_total) ** 0.9 + args.lr_end
+            #     param_group['lr'] = current_lr
+
+            input = torch.cat((lidar_in, img), 1).to(device, non_blocking=True)
+            output = model(input)
+            depth_est, lidar_out, precise, guide = output[0], output[1], output[2], output[3]
+            depth_est = torch.clamp(depth_est, 0, args.max_depth)
+            loss = criterion_local(depth_est, depth_gt)
+            loss_lidar = criterion_lidar(lidar_out, depth_gt)
+            loss_rgb = criterion_rgb(precise, depth_gt)
+            loss_guide = criterion_guide(guide, depth_gt)
+            loss = 1 * loss + 0.1 * loss_lidar + 0.1 * loss_rgb + 0.1 * loss_guide
 
             # output = model([img, lidar_in])
             # depth_est, lpg8x8, lpg4x4, lpg2x2, reduc1x1 = output[0], output[1], output[2], output[3], output[4]
@@ -316,8 +316,8 @@ if __name__ == '__main__':
 
             # 验证并保存最佳网络
             if global_step % args.val_freq == 0 and not just_load_net or global_step == steps_total:
-                # eval_measures, min_is_best_mask, measures_names = evalNet_lidar(model, dataloader_val, device, mea_nums)
-                eval_measures, min_is_best_mask, measures_names = evalNet(model, dataloader_val, device, mea_nums)
+                eval_measures, min_is_best_mask, measures_names = evalNet_lidar(model, dataloader_val, device, mea_nums)
+                # eval_measures, min_is_best_mask, measures_names = evalNet(model, dataloader_val, device, mea_nums)
                 model.train()
 
                 for i in range(len(eval_measures)):
